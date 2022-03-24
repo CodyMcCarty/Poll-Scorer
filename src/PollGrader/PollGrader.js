@@ -40,8 +40,8 @@ const PollGrader = () => {
   return (
     <Wrapper>
       <div>PollGrader</div>
-      <Setup />
-      <Score />
+      <Setup handleFile={handleFile} data={data} />
+      <Score data={data} />
       <Results />
 
       {/* <input type="file" onChange={(e) => handleFile(e)} /> */}
