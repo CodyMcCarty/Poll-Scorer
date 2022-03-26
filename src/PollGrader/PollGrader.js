@@ -84,21 +84,6 @@ const PollGrader = () => {
     return answers;
   };
 
-  // /**
-  //  * Makes an answer key
-  //  * @param {JSON} jsonData the poll results in JSON format
-  //  * @returns {OBJECT} the correct answers
-  //  */
-  // const updateAnswersKey = (jsonData) => {
-  //   let temp = {
-  //     "How many keywords should be in an ad group": ["40-60", "10-30"],
-  //     test: [5, 10],
-  //     test2: ["b", 4],
-  //   };
-  //   setAnswersKey(temp);
-  //   return temp;
-  // };
-
   /**
    * preps the poll results with the answer key, a score, and a Moodle Message.
    * @param {JSON} jsonData the poll results in JSON format
@@ -153,6 +138,7 @@ const PollGrader = () => {
   };
 
   /**
+   * Make dark theme
    * Setup:
    * titles
    * instructions

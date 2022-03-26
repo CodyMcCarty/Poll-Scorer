@@ -31,7 +31,7 @@ const Score = ({ scores }) => {
         {scores.map((row) => (
           <ListItem key={row.Name} button>
             <ListItemText
-              primary={`${row.Name}, Score ${row.Score}`}
+              primary={`${row.Name}, Score: ${row.Score}%`}
               secondary={row.Message.map((message, i) => message)}
             />
           </ListItem>
