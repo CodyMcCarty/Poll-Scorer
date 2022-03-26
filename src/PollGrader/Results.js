@@ -1,5 +1,7 @@
 import React from "react";
 
+// name list right answers, their answers with right answers
+
 const Results = ({ data }) => {
   return (
     <div>

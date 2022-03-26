@@ -12,54 +12,113 @@ import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
 
 const PollGrader = () => {
-  //   const [fileName, setFileName] = useState(null);
+  const [fileName, setFileName] = useState(null);
   const [data, setData] = useState([]);
-  const [answers, setAnswers] = useState([]);
-  const [score, setScore] = useState([]);
+  const [possibleAnswers, setPossibleAnswers] = useState({});
+  const [answersKey, setAnswersKey] = useState({});
+  const [scores, setScores] = useState([]);
 
   const handleFile = async (e) => {
     const file = e.target.files[0];
-    // setFileName(file.name);
+    setFileName(file.name);
     const data = await file.arrayBuffer();
     const workbook = XLSX.read(data);
 
     const worksheet = workbook.Sheets[workbook.SheetNames[0]];
     const jsonData = XLSX.utils.sheet_to_json(worksheet);
-    setData(jsonData);
-    const localAnswer = updateAnswers(jsonData);
-    updateScores(jsonData, localAnswer);
 
-    // console.log(jsonData);
+    const localPossibleAnswers = updatePossibleAnswers(jsonData);
+    setPossibleAnswers(localPossibleAnswers);
+    setData(jsonData);
+    // const localAnswer = updateAnswersKey(jsonData);
+    // const updatedJson = updateScores(jsonData, localAnswer);
   };
 
   const [value, setValue] = React.useState("1");
 
+  /**changes tabs */
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
 
-  const updateAnswers = (jsonData) => {
-    let temp = [
-      { "How many keywords should be in an ad group": ["40-60", "10-30"] },
-      { test: [5, 10] },
-      { test2: ["b", 4] },
-    ];
-    setAnswers(temp);
-    return temp;
-    // hard code for now
-    // let answers = setAnswers();
-    // jsonData.map((row) => {
-    //   console.log(row);
-    //   // Object.keys(row).map((key, i) => {
-    //   // console.log(key);
-    //   // });
-    // });
+  const updatePossibleAnswers = (jsonData) => {
+    let answers = {};
+    jsonData.map((row) => {
+      Object.keys(row).map((key, i) => {
+        if (key === "Name") return;
+        if (!answers[key]) answers[key] = [];
+        if (!answers[key].includes(row[key])) answers[key].push(row[key]);
+      });
+    });
+    return answers;
   };
 
-  const updateScores = (jsonData, answers) => {
-    jsonData.map((row) => {
-      Object.keys(row).map((key, i) => {});
+  /**
+   * Makes an answer key
+   * @param {JSON} jsonData the poll results in JSON format
+   * @returns {OBJECT} the correct answers
+   */
+  const updateAnswersKey = (jsonData) => {
+    let temp = {
+      "How many keywords should be in an ad group": ["40-60", "10-30"],
+      test: [5, 10],
+      test2: ["b", 4],
+    };
+    setAnswersKey(temp);
+    return temp;
+  };
+
+  /**
+   * preps the poll results with the answer key, a score, and a Moodle Message.
+   * @param {JSON} jsonData the poll results in JSON format
+   * @param {OBJECT} answerKey the correct answers
+   * @returns updates the JSON with the answer key, and a Moodle message.
+   */
+  const updateScores = (jsonData, answerKey) => {
+    let updatedJson = gradePoll(jsonData, answerKey);
+    updatedJson.map((row) => {
+      let numOfQs = 0;
+      let numOfCorrect = 0;
+      Object.keys(row).map((key, i) => {
+        if (key === "Name" || key === "Score" || key === "Message") return;
+        numOfQs += 1;
+        let correctAnswers = row[key][1];
+        let answerGiven = row[key][0];
+        if (correctAnswers.includes(answerGiven)) {
+          numOfCorrect += 1;
+        } else {
+          row.Message.push(`
+          the correct answer was ${row[key][1]} and you said ${row[key][0]}
+          `);
+        }
+      });
+      row.Score = numOfCorrect / numOfQs;
     });
+    setScores(updatedJson);
+    return updatedJson;
+  };
+
+  /** pairs their answer with the correct answers
+   *
+   * @param {JSON} jsonData the poll results in JSON format
+   * @param {OBJECT} answerKey the correct answers
+   * @returns {JSON} the poll results replacing (value)their answer with [their answer, [correct answers]]
+   */
+  const gradePoll = (jsonData, answerKey) => {
+    let updatedJsonData = [];
+    jsonData.map((row) => {
+      Object.keys(row).map((key, i) => {
+        if (key === "Name") return;
+        let newValue = [row[key]];
+        newValue.push(answerKey[key]);
+        row[key] = newValue;
+        row.Score = 0;
+        row.Message = [];
+      });
+      updatedJsonData.push(row);
+    });
+    setScores(updatedJsonData);
+    return updatedJsonData;
   };
 
   /**
@@ -89,15 +148,10 @@ const PollGrader = () => {
             </TabList>
           </Box>
           <TabPanel value="1">
-            <Setup
-              handleFile={handleFile}
-              data={data}
-              answers={answers}
-              setAnswers={setAnswers}
-            />
+            <Setup handleFile={handleFile} possibleAnswers={possibleAnswers} />
           </TabPanel>
           <TabPanel value="2">
-            <Score data={data} answers={answers} />
+            <Score scores={scores} />
           </TabPanel>
           <TabPanel value="3">
             <Results data={data} />

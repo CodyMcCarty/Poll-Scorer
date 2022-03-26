@@ -1,23 +1,24 @@
 import React from "react";
 import { Content } from "./PollGrader.styles";
 
-const Score = ({ data, answers }) => {
+// name, score, moodle message
+
+const Score = ({ scores }) => {
   return (
     <Content>
       <div>Score</div>
-      <div>
-        {data.map((row) => (
-          // console.log(row.Name)
-          <div key={row.Name}>
-            {Object.keys(row).map((key, i) => (
-              <p key={i}>
-                <span>Key: {key}</span>
-                <span>Row: {row[key]}</span>
-              </p>
+      {scores.map((row) => (
+        <div key={row.Name}>
+          <div>{row.Name}</div>
+          <div>{row.Score}</div>
+          <div>
+            {row.Message.map((message, i) => (
+              <p key={`${row.Message} ${i}`}>{message}. </p>
             ))}
           </div>
-        ))}
-      </div>
+          <div />
+        </div>
+      ))}
     </Content>
   );
 };
