@@ -1,6 +1,10 @@
 import React from "react";
 
-// name list right answers, their answers with right answers
+/**
+ * statitics on the poll
+ * table to sort by score name:score
+ * table to sort by % of wrong answers to see if we should throw out a question
+ */
 
 const Results = ({ data }) => {
   return (
