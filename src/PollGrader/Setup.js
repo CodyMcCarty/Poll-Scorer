@@ -46,6 +46,7 @@ const Setup = ({
   };
 
   //TODO: add checkbox to input custom answer incase eb got it wrong
+  // TODO bug with clicking on some boxes that are the same answer elsewhere
 
   return (
     <Content>
