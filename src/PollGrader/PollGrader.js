@@ -17,6 +17,7 @@ const PollGrader = () => {
   const [possibleAnswers, setPossibleAnswers] = useState({});
   const [answersKey, setAnswersKey] = useState({});
   const [scores, setScores] = useState([]);
+  const [checkedAnswer, setCheckedAnswer] = useState({});
 
   const handleFile = async (e) => {
     const file = e.target.files[0];
@@ -30,6 +31,8 @@ const PollGrader = () => {
     const localPossibleAnswers = updatePossibleAnswers(jsonData);
     setPossibleAnswers(localPossibleAnswers);
     setData(jsonData);
+    prepAnswerKey(localPossibleAnswers);
+    initialChecked(localPossibleAnswers);
     // const localAnswer = updateAnswersKey(jsonData);
     // const updatedJson = updateScores(jsonData, localAnswer);
   };
@@ -41,6 +44,34 @@ const PollGrader = () => {
     setValue(newValue);
   };
 
+  const initialChecked = (possibleAnswers) => {
+    let initial = {};
+    Object.keys(possibleAnswers).map((key, i) => {
+      possibleAnswers[key].map((answer) => {
+        initial[answer] = false;
+      });
+    });
+    setCheckedAnswer(initial);
+    return initial;
+  };
+
+  /**
+   *
+   * @param {OBJECT} QnA question:[answer]
+   */
+  const prepAnswerKey = (QnA) => {
+    let answerKey = {};
+    Object.keys(QnA).map((key, i) => {
+      answerKey[key] = [];
+    });
+    setAnswersKey(answerKey);
+  };
+
+  /**
+   * Used to lay out checkable answers for setup
+   * @param {JSON} jsonData the poll results in JSON format
+   * @returns {OBJECT} question: [all possible answers]
+   */
   const updatePossibleAnswers = (jsonData) => {
     let answers = {};
     jsonData.map((row) => {
@@ -53,20 +84,20 @@ const PollGrader = () => {
     return answers;
   };
 
-  /**
-   * Makes an answer key
-   * @param {JSON} jsonData the poll results in JSON format
-   * @returns {OBJECT} the correct answers
-   */
-  const updateAnswersKey = (jsonData) => {
-    let temp = {
-      "How many keywords should be in an ad group": ["40-60", "10-30"],
-      test: [5, 10],
-      test2: ["b", 4],
-    };
-    setAnswersKey(temp);
-    return temp;
-  };
+  // /**
+  //  * Makes an answer key
+  //  * @param {JSON} jsonData the poll results in JSON format
+  //  * @returns {OBJECT} the correct answers
+  //  */
+  // const updateAnswersKey = (jsonData) => {
+  //   let temp = {
+  //     "How many keywords should be in an ad group": ["40-60", "10-30"],
+  //     test: [5, 10],
+  //     test2: ["b", 4],
+  //   };
+  //   setAnswersKey(temp);
+  //   return temp;
+  // };
 
   /**
    * preps the poll results with the answer key, a score, and a Moodle Message.
@@ -74,7 +105,7 @@ const PollGrader = () => {
    * @param {OBJECT} answerKey the correct answers
    * @returns updates the JSON with the answer key, and a Moodle message.
    */
-  const updateScores = (jsonData, answerKey) => {
+  const updateScores = (e, jsonData = data, answerKey = answersKey) => {
     let updatedJson = gradePoll(jsonData, answerKey);
     updatedJson.map((row) => {
       let numOfQs = 0;
@@ -83,16 +114,16 @@ const PollGrader = () => {
         if (key === "Name" || key === "Score" || key === "Message") return;
         numOfQs += 1;
         let correctAnswers = row[key][1];
-        let answerGiven = row[key][0];
+        let answerGiven = String(row[key][0]).trim();
         if (correctAnswers.includes(answerGiven)) {
           numOfCorrect += 1;
         } else {
           row.Message.push(`
-          the correct answer was ${row[key][1]} and you said ${row[key][0]}
+          The correct answer was ${row[key][1]} and you said ${row[key][0]}.
           `);
         }
       });
-      row.Score = numOfCorrect / numOfQs;
+      row.Score = ((numOfCorrect / numOfQs) * 100).toFixed(2);
     });
     setScores(updatedJson);
     return updatedJson;
@@ -143,12 +174,21 @@ const PollGrader = () => {
           <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
             <TabList onChange={handleChange} aria-label="lab API tabs example">
               <Tab label="Set Up" value="1" />
-              <Tab label="Item Two" value="2" />
-              <Tab label="Item Three" value="3" />
+              <Tab label="Score" value="2" />
+              <Tab label="Full Results" value="3" />
             </TabList>
           </Box>
           <TabPanel value="1">
-            <Setup handleFile={handleFile} possibleAnswers={possibleAnswers} />
+            <Setup
+              handleFile={handleFile}
+              possibleAnswers={possibleAnswers}
+              answersKey={answersKey}
+              setAnswersKey={setAnswersKey}
+              fileName={fileName}
+              updateScores={updateScores}
+              checkedAnswer={checkedAnswer}
+              setCheckedAnswer={setCheckedAnswer}
+            />
           </TabPanel>
           <TabPanel value="2">
             <Score scores={scores} />
