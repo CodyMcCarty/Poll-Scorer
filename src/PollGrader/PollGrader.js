@@ -104,7 +104,7 @@ const PollGrader = () => {
           numOfCorrect += 1;
         } else {
           row.Message.push(`
-          The correct answer was ${row[key][1]} and you said ${row[key][0]}.
+          ${key}? The correct answer was ${row[key][1]} and you said ${row[key][0]}.
           `);
         }
       });
@@ -125,7 +125,8 @@ const PollGrader = () => {
     jsonData.map((row) => {
       Object.keys(row).map((key, i) => {
         if (key === "Name") return;
-        let newValue = [row[key]];
+        let newValue = [row[key]]; // their answer
+        if (Array.isArray(row[key])) newValue = [row[key][0]]; // their answer after the first save scores setup
         newValue.push(answerKey[key]);
         row[key] = newValue;
         row.Score = 0;
@@ -151,6 +152,7 @@ const PollGrader = () => {
    *
    * Results:
    * big table results all info
+   * update Readme
    */
 
   return (

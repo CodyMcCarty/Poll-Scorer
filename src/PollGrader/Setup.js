@@ -44,12 +44,8 @@ const Setup = ({
     }
     setAnswersKey(answerKey);
   };
-  /**
-   * Setup:
-   * titles
-   * instructions
-   * set up popup, select correct answers, ability to re-edit
-   */
+
+  //TODO: add checkbox to input custom answer incase eb got it wrong
 
   return (
     <Content>
