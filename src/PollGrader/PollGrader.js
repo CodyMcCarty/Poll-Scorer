@@ -18,6 +18,9 @@ const PollGrader = () => {
   const [answersKey, setAnswersKey] = useState({});
   const [scores, setScores] = useState([]);
   const [checkedAnswer, setCheckedAnswer] = useState({});
+  const [questionsDifficulty, setQuestionsDifficulty] = useState([
+    { question: "test", difficulty: 5 },
+  ]);
 
   const handleFile = async (e) => {
     const file = e.target.files[0];
@@ -27,6 +30,8 @@ const PollGrader = () => {
 
     const worksheet = workbook.Sheets[workbook.SheetNames[0]];
     const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+    console.log(jsonData);
 
     const localPossibleAnswers = updatePossibleAnswers(jsonData);
     setPossibleAnswers(localPossibleAnswers);
@@ -96,6 +101,7 @@ const PollGrader = () => {
    * @returns updates the JSON with the answer key, and a Moodle message.
    */
   const updateScores = (e, jsonData = data, answerKey = answersKey) => {
+    setQuestionsDifficulty([{ question: "test", difficulty: 5 }]);
     let updatedJson = gradePoll(jsonData, answerKey);
     updatedJson.map((row) => {
       let numOfQs = 0;
@@ -111,12 +117,50 @@ const PollGrader = () => {
           row.Message.push(`
           ${key}? The correct answer was ${row[key][1]} and you said ${row[key][0]}.
           `);
+          // add num of question wrong to qDifficulty
+          findQuestionDifficulty(key);
         }
       });
       row.Score = ((numOfCorrect / numOfQs) * 100).toFixed(2);
     });
     setScores(updatedJson);
     return updatedJson;
+  };
+
+  const findQuestionDifficulty = (question) => {
+    let localQDiff = questionsDifficulty;
+    let isFound = false;
+    localQDiff.map((obj) => {
+      if (obj.question === question) {
+        obj.difficulty += 1;
+        isFound = true;
+      }
+    });
+    if (!isFound) {
+      let newQ = { question: question, difficulty: 1 };
+      localQDiff.push(newQ);
+    }
+    setQuestionsDifficulty(localQDiff);
+    // check if that question is already in questionDifficulty
+    // if not add {question : 0}
+    // that question ++
+    // let qsDifficulty = [...questionsDifficulty];
+    // let qDifficulty = questionsDifficulty[question];
+    // if (!qDifficulty) {
+    //   qDifficulty = {};
+    //   qDifficulty[question] = 0;
+    // }
+    // qDifficulty[question] = qDifficulty[question] + 1;
+
+    // let qDifficulty = {};
+    // !questionsDifficulty.question
+    //   ? (qDifficulty[question] = 0)
+    //   : (qDifficulty = questionsDifficulty[question]);
+    // qDifficulty[question] += 1;
+    // let qDifficulty = {};
+    // if (!(question in questionDifficulty)) qDifficulty[question] = 0;
+    // qDifficulty[question] += 1;
+    // setQuestionsDifficulty((current) => [...current, [qDifficulty]]);
   };
 
   /** pairs their answer with the correct answers
@@ -187,7 +231,11 @@ const PollGrader = () => {
             <Score scores={scores} />
           </TabPanel>
           <TabPanel value="3">
-            <Results data={data} />
+            <Results
+              data={data}
+              scores={scores}
+              questionsDifficulty={questionsDifficulty}
+            />
           </TabPanel>
         </TabContext>
       </Box>
