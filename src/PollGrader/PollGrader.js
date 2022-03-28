@@ -37,6 +37,7 @@ const PollGrader = () => {
     // const updatedJson = updateScores(jsonData, localAnswer);
   };
 
+  // TODO: change from value to current tab
   const [value, setValue] = React.useState("1");
 
   /**changes tabs */
@@ -48,7 +49,11 @@ const PollGrader = () => {
     let initial = {};
     Object.keys(possibleAnswers).map((key, i) => {
       possibleAnswers[key].map((answer) => {
-        initial[answer] = false;
+        // ensures uniqness of the answer value pair in the event that answer exist for another question i.e. 2 yes/no questions
+        let tKeyQ = `${key}`.trim();
+        let tValueAnswer = `${answer}`.trim();
+        let objKey = `${tKeyQ}_${tValueAnswer}`.trim();
+        initial[objKey] = false;
       });
     });
     setCheckedAnswer(initial);

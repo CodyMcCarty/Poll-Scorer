@@ -25,24 +25,26 @@ const Setup = ({
    * @param {event} e the event
    */
   const handleCheckedAnswers = (e) => {
-    let answerKey = answersKey;
+    let localAnswerKey = answersKey;
     let isChecked = e.target.checked;
     let QnA = e.target.name.split(",");
     let question = QnA[0].trim();
     let answer = QnA[1].trim();
+    let objKey = `${question}_${answer}`.trim();
 
     setCheckedAnswer({
       ...checkedAnswer,
-      [answer]: isChecked,
+      [objKey]: isChecked,
     });
 
-    if (!answerKey[question]) answerKey[question] = [];
-    if (isChecked) answerKey[question].push(answer);
+    if (!localAnswerKey[question]) localAnswerKey[question] = [];
+    if (isChecked) localAnswerKey[question].push(answer);
     if (!isChecked) {
-      let index = answerKey[question].indexOf(answer);
-      if (index !== -1) answerKey[question].splice(index, 1);
+      let index = localAnswerKey[question].indexOf(answer);
+      if (index !== -1) localAnswerKey[question].splice(index, 1);
     }
-    setAnswersKey(answerKey);
+
+    setAnswersKey(localAnswerKey);
   };
 
   //TODO: add checkbox to input custom answer incase eb got it wrong
@@ -78,7 +80,13 @@ const Setup = ({
                   control={
                     <Checkbox
                       checked={
-                        checkedAnswer[answer] ? checkedAnswer[answer] : false
+                        checkedAnswer[
+                          `${question.trim()}_${answer.trim()}`.trim()
+                        ]
+                          ? checkedAnswer[
+                              `${question.trim()}_${answer.trim()}`.trim()
+                            ]
+                          : false
                       }
                       onChange={handleCheckedAnswers}
                       name={`${question}, ${answer}`}
@@ -91,6 +99,10 @@ const Setup = ({
           </FormControl>
         ))}
       </Box>
+
+      <Button variant="outlined" onClick={updateScores}>
+        Save Scores
+      </Button>
     </Content>
   );
 };
