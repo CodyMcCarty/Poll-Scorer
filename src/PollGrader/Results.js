@@ -49,7 +49,7 @@ const Results = ({ data, scores, questionsDifficulty }) => {
         The average Score was: {avgScore.toFixed(2)}% for all poll takers
       </Typography>
       {questionsDifficulty.map((questions) => (
-        <Typography>{`${questions.question} ${questions.difficulty}`}</Typography>
+        <Typography>{`${questions.question} - ${questions.difficulty} people got this one wrong`}</Typography>
       ))}
     </Content>
   );
